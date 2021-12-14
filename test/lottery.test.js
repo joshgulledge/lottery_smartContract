@@ -17,3 +17,22 @@ beforeEach(async () => {
                 gas: '1000000'});
 });
 
+describe('Lottery Contract', () => {
+    it('deploys to network', () => {
+        assert.ok(lottery.options.address);
+    });
+
+    it('allows account to enter', async () => {
+        await lottery.methods.enter().send({
+            from: accounts[1],
+            value: web3Inst.utils.toWei('.02', 'ether')
+        });
+
+        const players = await lottery.methods.getPlayersList().call({
+            from: accounts[0]
+        });
+
+        assert.equal(accounts[1], players[0]);
+        assert.equal(1, players.length);
+    })
+})

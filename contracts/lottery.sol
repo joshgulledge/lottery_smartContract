@@ -14,7 +14,7 @@ contract Lottery {
         players.push(msg.sender);
     }
 
-    function playersList() public view returns (address[]) {
+    function getPlayersList() public view returns (address[]) {
         return players;
     }
 
