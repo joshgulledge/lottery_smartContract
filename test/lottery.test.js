@@ -44,12 +44,12 @@ describe('Lottery Contract', () => {
 
         await lottery.methods.enter().send({
             from: accounts[2],
-            value: web3Inst.utils.toWei('.2', 'ether')
+            value: web3Inst.utils.toWei('.02', 'ether')
         });
 
         await lottery.methods.enter().send({
             from: accounts[3],
-            value: web3Inst.utils.toWei('.2', 'ether')
+            value: web3Inst.utils.toWei('.02', 'ether')
         });
 
         const players = await lottery.methods.getPlayersList().call({
@@ -75,5 +75,42 @@ describe('Lottery Contract', () => {
         };
     });
 
-    
+    it('non-manager cannot pick winner', async () => {
+        try {
+            await lottery.methods.pickWinner().send({
+                from: accounts[1]
+            });
+            assert(false);
+        } catch (err) {
+            assert(err);
+        }
+    });
+
+    it('end to end test', async () => {
+        await lottery.methods.enter().send({
+            from: accounts[1],
+            value: web3Inst.utils.toWei('2', 'ether')
+        });
+
+        const initialBalanceOne = await web3Inst.eth.getBalance(accounts[1]);
+
+        await lottery.methods.pickWinner().send({
+            from: accounts[0]
+        });
+
+        const finalBalanceOne = await web3Inst.eth.getBalance(accounts[1]);
+        const testResult = initialBalanceOne < finalBalanceOne;
+
+        const players = await lottery.methods.getPlayersList().call({
+            from: accounts[0]
+        });
+
+        const contractEther = await web3Inst.eth.getBalance(lottery.options.address);
+        
+        // make sure list of players is empty and winner got ether 
+        // and contract has no ether
+        assert.equal(0, players.length);
+        assert.equal(0, contractEther);
+        assert(testResult);
+    })
 })
